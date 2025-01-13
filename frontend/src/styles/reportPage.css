@@ -1,0 +1,112 @@
+/* ReportPage.css */
+.pdf_report {
+	max-width: 960px !important;
+	background-color: #fff;
+	border-radius: 8px;
+}
+
+.pdf_report section {
+	padding: 24px;
+}
+
+.pdf_report h1,
+.pdf_report h2,
+.pdf_report h3,
+.pdf_report h4 {
+	color: #252525;
+	text-align: center;
+	font-weight: 500;
+}
+
+.pdf_report ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+.pdf_report li {
+	padding: 5px 0;
+}
+
+.pdf_report .statistics {
+	text-align: center;
+	margin: 10px 0;
+}
+
+.pdf_report .statistics-content {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pdf_report .pie-chart-container {
+	width: 60%;
+	height: 200px;
+}
+
+.pdf_report .ratings {
+	width: 40%;
+	text-align: left;
+}
+
+/* .pdf_report .stars {
+	background: linear-gradient(90deg, #ffc800, #ffbf00);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+} */
+
+.pdf_report .rating-explanation {
+	margin-top: 10px;
+}
+
+.pdf_report .bar-chart-container {
+	display: flex;
+	justify-content: center;
+	margin: 20px 0;
+}
+
+.pdf_report .no-responses {
+	background-color: #ffe6e6;
+	padding: 10px;
+	border: 1px solid #ffcccc;
+	border-radius: 4px;
+}
+
+.pdf_report .comparison {
+	background-color: #e6f7ff;
+	padding: 10px;
+	border: 1px solid #b3e0ff;
+	border-radius: 4px;
+	margin-top: 20px;
+}
+
+.pdf_report table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 10px;
+	background-color: #fff;
+}
+
+.pdf_report table,
+.pdf_report th,
+.pdf_report td {
+	border: 1px solid #ddd;
+}
+
+.pdf_report th,
+.pdf_report td {
+	padding: 12px;
+	text-align: left;
+}
+
+.pdf_report th {
+	background-color: #f2f2f2;
+	font-weight: bold;
+}
+
+.pdf_report tr:nth-child(even) {
+	background-color: #f9f9f9;
+}
+
+.pdf_report tr:hover {
+	background-color: #f1f1f1;
+}

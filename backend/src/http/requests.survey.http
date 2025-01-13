@@ -1,0 +1,53 @@
+
+GET http://localhost:8080/api/survey
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+
+POST http://localhost:8080/api/survey 
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+{
+  "hotelName": "Sunset Resort",
+  "campaign": "Summer Promo",
+  "location": "Miami Beach",
+  "startDate": "2024-06-01T00:00:00.000Z",
+  "endDate": "2024-06-30T00:00:00.000Z",
+  "clientName": "John Doe",
+  "clientId": 1,
+  "questions": [
+    {
+      "type": "text",
+      "text": "How would you rate the cleanliness of the hotel?",
+      "options": {},
+      "categoryId": 1
+    },
+    {
+      "type": "multi_choice",
+      "text": "How was the check-in process?",
+      "options": {
+        "1": "Very Good",
+        "2": "Good",
+        "3": "Average",
+        "4": "Poor"
+      },
+      "categoryId": 2
+    },
+    {
+      "type": "text",
+      "text": "Any additional comments or suggestions?",
+      "options": {},
+      "categoryId": 3
+    }
+  ]
+}
+
+###
+
+DELETE  http://localhost:8080/api/survey/3 
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+

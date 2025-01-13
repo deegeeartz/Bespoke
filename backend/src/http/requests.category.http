@@ -1,0 +1,22 @@
+
+GET http://localhost:8080/api/category
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+
+POST http://localhost:8080/api/category 
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+{
+	"title": "Check out and departure - Reception"
+}
+
+###
+
+DELETE  http://localhost:8080/api/category/15
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+

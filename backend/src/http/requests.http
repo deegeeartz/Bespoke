@@ -1,0 +1,81 @@
+
+GET https://bespokeaudits.dytech.studio/api/
+
+###
+
+POST https://bespokeaudits.dytech.studio/api/auth/login 
+content-type: application/json
+
+{
+	"email": "admin@bespoke.com",
+	"password": "admin24"
+}
+
+###
+
+POST https://bespokeaudits.dytech.studio/api/auth/login 
+content-type: application/json
+
+{
+	"email": "yusufdaudu51@gmail.com",
+	"password": "yusufdaudu51@gmail.com"
+}
+
+###
+
+GET https://bespokeaudits.dytech.studio/api/admin/stats
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE4MjQyMDQ5LCJleHAiOjE3MTgyNjM2NDl9.A7vDi8h24gr4EiQwkf6TXdThkYSSWBtkmEUD-VTRiAE
+
+###
+
+POST https://bespokeaudits.dytech.studio/api/user/clients 
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE4MjQyMDQ5LCJleHAiOjE3MTgyNjM2NDl9.A7vDi8h24gr4EiQwkf6TXdThkYSSWBtkmEUD-VTRiAE
+
+{
+	"hotelName": "Hotel Dave",
+	"location": "London",
+	"additionalNotes": "This is a note",
+	"name": "Emmanuel",
+	"email": "emma45@test.com",
+	"password": "#password2345"
+}
+
+###
+
+GET https://bespokeaudits.dytech.studio/api/inspectors/
+
+###
+
+GET https://bespokeaudits.dytech.studio/api/cloudinary/list
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE4MjQyMDQ5LCJleHAiOjE3MTgyNjM2NDl9.A7vDi8h24gr4EiQwkf6TXdThkYSSWBtkmEUD-VTRiAE
+
+###
+
+GET https://bespokeaudits.dytech.studio/api/cloudinary/setup
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE4MjQyMDQ5LCJleHAiOjE3MTgyNjM2NDl9.A7vDi8h24gr4EiQwkf6TXdThkYSSWBtkmEUD-VTRiAE
+
+###
+
+GET https://bespokeaudits.dytech.studio/api/cloudinary/delete/q07a1kvwsxgelj3bgp5z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE4MjQyMDQ5LCJleHAiOjE3MTgyNjM2NDl9.A7vDi8h24gr4EiQwkf6TXdThkYSSWBtkmEUD-VTRiAE
+
+###
+
+POST https://bespokeaudits.dytech.studio/api/inspectors 
+content-type: application/json
+
+{
+	"location": "London UK",
+	"language": "English",
+	"phoneNumber": "090446344354",
+	"name": "Emmanuel 2",
+	"email": "emma63@test.com",
+	"password": "#password2345"
+}
+
+###
+
+GET  https://bespokeaudits.dytech.studio/api/auth/setup 
+
+###

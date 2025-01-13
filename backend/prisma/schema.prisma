@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // binaryTargets = ["native", "debian-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  CLIENT
+  INSPECTOR
+}
+
+enum SurveyType {
+  INTERNAL
+  EXTERNAL
+}
+
+// Models
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  role     Role
+  name     String?
+
+  // Relationships
+  client    Client?
+  inspector Inspector?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@map("user")
+}
+
+model Client {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @unique
+
+  hotelName       String
+  location        String?
+  additionalNotes String? @db.Text
+  passcode        String?
+
+  surveys    Survey[]
+  Inspectors Inspector[]
+
+  @@map("client")
+}
+
+model Inspector {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @unique
+
+  // Add additional fields specific to inspector users
+  location    String?
+  language    String?
+  phoneNumber String?
+  passcode    String?
+  audits      Audit[]
+  type        SurveyType @default(EXTERNAL)
+
+  clientId Int?
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  @@map("inspector")
+}
+
+// SURVEY
+
+model Survey {
+  id Int @id @default(autoincrement())
+
+  hotelName        String
+  campaign         String?
+  location         String?
+  startDate        DateTime?
+  endDate          DateTime?
+  inspectors       Json?
+  clientName       String?
+  clientId         Int?
+  categories       Json?
+  sortedCategories Json?
+  type             SurveyType @default(EXTERNAL)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  questions Question[]
+  client    Client?    @relation(fields: [clientId], references: [id])
+  audits    Audit[]
+
+  @@map("survey")
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  title String
+
+  @@map("category")
+}
+
+model Question {
+  id         Int    @id @default(autoincrement())
+  type       String
+  text       String
+  options    Json
+  categoryId String
+  surveyId   Int
+
+  // Relationships
+  survey    Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  responses Response[]
+
+  @@map("question")
+}
+
+// AUDIT
+
+model Audit {
+  id               Int     @id @default(autoincrement())
+  expense          String? @db.Text
+  brandStandard    String? @db.Text
+  detailedSummary  String? @db.Text
+  executiveSummary String? @db.Text
+  scenario         String? @db.Text
+  status           String?
+  feedback         String? @db.Text
+  uploads          Json?
+  inspectorId      Int?
+  surveyId         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  responses Response[]
+  inspector Inspector? @relation(fields: [inspectorId], references: [id])
+  survey    Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@map("audit")
+}
+
+model Response {
+  id Int @id @default(autoincrement())
+
+  answer       String?
+  optionAnswer String?
+  optionText   String?
+  files        Json?
+  skip         Boolean?
+  questionId   Int
+  auditId      Int
+
+  // Relationships
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  audit    Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@map("response")
+}

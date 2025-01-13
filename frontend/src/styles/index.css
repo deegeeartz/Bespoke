@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* BASE */
+* {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	text-decoration: none;
+	outline: none;
+}
+
+body {
+	color: #252525;
+	font-family: 'Raleway', sans-serif;
+}
+
+img {
+	max-width: 100%;
+}
+
+/* Helpers */
+._flex {
+	display: flex;
+	align-items: center;
+}
+.fx_center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+.fx_between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+._grid {
+	display: grid;
+	align-content: center;
+}
+.grid_center {
+	display: grid;
+	align-content: center;
+	justify-content: center;
+	text-align: center;
+}
+
+/* PAGES */
+
+.btn_primary {
+	text-align: center;
+	font-size: 14px;
+	padding: 7px 24px;
+	border-radius: 6px;
+	color: #fff;
+	background: #252525;
+	justify-content: center;
+	@apply select-none transition-all hover:opacity-85;
+}
+
+.btn_outline {
+	font-size: 13px;
+	padding: 6px 16px;
+	border-radius: 6px;
+	color: #252525;
+	border: 1px solid #252525;
+	cursor: pointer;
+	@apply select-none transition-all hover:bg-[#252525] hover:text-white;
+}
+
+/*!----- SECTIONS -------*/
+.tableHeader {
+	padding: 6px 16px 10px !important;
+	border-bottom-width: 1px;
+	border-bottom-color: rgba(0, 0, 0, 0.12);
+	border-bottom-style: solid;
+}
+.rdt_Pagination select {
+	background-image: none !important;
+	padding-right: 24px !important;
+}
+
+.rdt_Pagination .epZUJV svg {
+	top: 0;
+	bottom: 0;
+	margin-block: auto;
+}
+.datatable {
+	border-radius: 2px !important;
+}
+.datatable .rdt_TableHeadRow {
+	background: #f5f5f5 !important;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+	/* border-top-width: 1px;
+	border-top-color: rgba(0, 0, 0, 0.12);
+	border-top-style: solid; */
+}
+.datatable .rdt_TableCol > div > div,
+.datatable .rdt_TableCell > div {
+	white-space: break-spaces !important;
+}
+
+.datatable .rdt_TableCol:nth-of-type(1),
+.datatable .rdt_TableCell:nth-of-type(1) {
+	padding-right: 0 !important;
+	width: 90px !important;
+}
+
+form.readOnly input,
+form.readOnly select {
+	color: #555 !important;
+}
+
+.accordionTitle,
+.accordionTitle > *:not(svg) {
+	width: 100%;
+}
+
+.suggestions {
+	position: absolute;
+	top: 50px;
+	left: 0px;
+	z-index: 999;
+	cursor: pointer;
+	width: 100%;
+	max-height: 200px;
+	overflow: auto;
+	background: #fff;
+	z-index: 999;
+
+	@apply shadow-xl border border-gray-200 rounded-md;
+}
+
+.suggestions > div {
+	padding: 9px 18px;
+	font-size: 15px;
+	/* border-bottom: 1px solid #bbb; */
+	transition: all 0.1s ease;
+
+	@apply border-b border-gray-100;
+}
+
+/*!----- MEDIA QUERIES -------*/
+@media (min-width: 1280px) {
+	/* .container {
+		max-width: 1280px;
+	} */
+}
+
+/*!----- OTHER -------*/
+
+/* PDF REPORT STYLES */
+@import url('./reportPage.css');

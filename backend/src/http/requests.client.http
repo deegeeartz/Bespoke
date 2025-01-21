@@ -1,0 +1,48 @@
+
+GET http://localhost:8080/api/client/list
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+
+POST http://localhost:8080/api/client 
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+{
+	"hotelName": "KM Hotels",
+	"location": "London UK",
+	"additionalNotes": "",
+	"name": "KM Limited",
+	"email": "kmlimited@test.com",
+	"password": "1234pass"
+}
+
+###
+
+PUT http://localhost:8080/api/client/2
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+{
+	"location": "Brigtin UK",
+	"language": "EN",
+	"phoneNumber": "+44048344354",
+	"name": "Samuel Dave",
+	"email": "samdave555@test.com",
+	"password": "34574235b"
+}
+
+###
+
+GET  http://localhost:8080/api/client/2
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+
+DELETE  http://localhost:8080/api/client/15
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE2Mzg3OTE1LCJleHAiOjE3MTY2NDcxMTV9.RbiQI5y08jYbD4WvxbJ2NDjJh4ctstevqiS_2bHZLkQ
+
+###
+

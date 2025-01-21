@@ -26,6 +26,17 @@ enum SurveyType {
   EXTERNAL
 }
 
+enum Status {
+  PENDING
+  DONE
+}
+
+enum ResponseState {
+  NOT_SEEN
+  NOT_ADDRESSED
+  ADDRESSED
+}
+
 // Models
 model User {
   id       Int     @id @default(autoincrement())
@@ -56,6 +67,9 @@ model Client {
 
   surveys    Survey[]
   Inspectors Inspector[]
+  staff     InternalStaff[]
+  queries     QueryStaff[]
+  audits      Audit[]
 
   @@map("client")
 }
@@ -92,7 +106,7 @@ model Survey {
   inspectors       Json?
   clientName       String?
   clientId         Int?
-  categories       Json?
+  categories       SurveyCategory[]
   sortedCategories Json?
   type             SurveyType @default(EXTERNAL)
 
@@ -114,17 +128,34 @@ model Category {
   @@map("category")
 }
 
+model SurveyCategory {
+  recId         Int    @id @default(autoincrement())
+  title      String?
+  id         String? @unique
+  questions  Question[]
+  surveyId   Int?
+  auditId    Int?
+  responses  Response[]
+
+  survey      Survey?     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  audit       Audit?    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@map("surveyCategory")
+}
+
 model Question {
-  id         Int    @id @default(autoincrement())
-  type       String
-  text       String
-  options    Json
-  categoryId String
-  surveyId   Int
+  id          Int    @id @default(autoincrement())
+  type        String
+  text        String
+  options     Json
+  categoryId  String?
+  surveyId    Int
 
   // Relationships
-  survey    Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  survey      Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  category    SurveyCategory?     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   responses Response[]
+  queries   QueryStaff[]
 
   @@map("question")
 }
@@ -143,6 +174,8 @@ model Audit {
   uploads          Json?
   inspectorId      Int?
   surveyId         Int
+  clientId         Int
+  categories       SurveyCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -151,7 +184,9 @@ model Audit {
   responses Response[]
   inspector Inspector? @relation(fields: [inspectorId], references: [id])
   survey    Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  client    Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
+  @@index([clientId])
   @@map("audit")
 }
 
@@ -164,11 +199,66 @@ model Response {
   files        Json?
   skip         Boolean?
   questionId   Int
+  categoryId   String?
   auditId      Int
+  state        ResponseState @default(NOT_SEEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   audit    Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  category SurveyCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  queries QueryStaff[]
 
+  @@index([state, optionText])
   @@map("response")
+}
+
+model InternalStaff {
+  id           Int        @id @default(autoincrement())
+  role         String?
+  hotelName    String?
+  phoneNumber  String?
+  passcode     String?
+  email        String?   @unique
+  name         String?
+
+  clientId     Int?
+  client       Client?      @relation(fields: [clientId], references: [id])
+
+  queries      QueryStaff[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([clientId])
+  @@map("internalStaff")
+}
+
+model QueryStaff {
+  id           Int       @id @default(autoincrement())
+  comment      String?   @db.Text
+  deadline     String?
+  status       Status    @default(PENDING)
+  categoryId   String?
+  categoryName String?
+
+  //Relationships   
+  staffId   Int?
+  staff     InternalStaff? @relation(fields: [staffId], references: [id])
+
+  clientId Int?
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  responseId Int?
+  response   Response? @relation(fields: [responseId], references: [id])
+
+  questionId Int?
+  question   Question? @relation(fields: [questionId], references: [id])
+
+  @@index([status, clientId])
+  @@map("queryStaff")
+
 }

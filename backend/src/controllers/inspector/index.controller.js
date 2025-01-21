@@ -42,7 +42,7 @@ const getSurveyById = async (req, res) => {
 		const { id } = req.params;
 		const result = await prisma.survey.findUnique({
 			where: { id: parseInt(id) },
-			include: { questions: true },
+			include: { categories : true, questions: true },
 		});
 		if (!result) return res.status(404).json({ error: 'Survey not found!' });
 

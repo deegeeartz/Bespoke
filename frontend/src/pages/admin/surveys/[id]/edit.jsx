@@ -185,6 +185,7 @@ const EditSurvey = () => {
 			const res = await http.put(`/survey/${surveyId}`, payload);
 			if (res?.status == 200) {
 				if (showAlert) toast.success(res.data.message);
+				fetchData();
 			}
 		} catch (error) {
 			errorHandler(error);

@@ -18,6 +18,24 @@ const schema = Joi.object({
 	// inspectorId: Joi.number().required(),
 });
 
+function determineState(optionText) {
+	if (optionText === 'NO') return 'NOT_ADDRESSED';
+	else if (optionText === 'YES') return 'ADDRESSED';
+	else return 'NOT_SEEN';
+};
+
+async function getCatId(id) {
+	const catId = await prisma.question.findFirst({
+        where : {
+            id
+        },
+        select : {
+            categoryId : true
+        }
+    });
+	return (catId).categoryId;
+};
+
 const getAllRecords = async (req, res) => {
 	try {
 		const { search } = req.query;
@@ -170,7 +188,7 @@ const getRecordById = async (req, res) => {
 			where: { id: parseInt(id) },
 			include: {
 				inspector: true,
-				survey: { include: { questions: true } },
+				survey: { include: { categories : true, questions: true } },
 				responses: true,
 			},
 		});
@@ -190,7 +208,6 @@ const getRecordById = async (req, res) => {
 					result.survey.sortedCategories?.indexOf(a.id) - result.survey.sortedCategories?.indexOf(b.id)
 			);
 		}
-
 		res.status(200).json({ result: { ...result, groupedQuestions } });
 	} catch (error) {
 		console.error('Error fetching data:', error);
@@ -220,6 +237,15 @@ const createRecord = async (req, res) => {
 		const inspector = await prisma.inspector.findUnique({ where: { userId } });
 		if (!inspector) return res.status(404).json({ error: 'Inspector not found!' });
 
+		const _clientId = await prisma.survey.findUnique({
+			where : {id : parseInt(surveyId)},
+			select : {
+				clientId : true
+			}
+		});
+
+		if (!_clientId) return res.status(404).json({ error: 'Client not found!' });
+
 		const result = await prisma.audit.create({
 			data: {
 				expense,
@@ -231,17 +257,33 @@ const createRecord = async (req, res) => {
 				inspectorId: inspector.id,
 				surveyId,
 				uploads,
-				responses: {
-					create: responses.map((response) => ({
-						answer: response.answer,
-						optionAnswer: response.optionAnswer,
-						optionText: response.optionText,
-						files: response.files ?? [],
-						skip: response.skip,
-						questionId: response.questionId,
-					})),
-				},
+				clientId : _clientId.clientId,
 			},
+		});
+		const updatedResponse = await Promise.all(responses.map(async (response) => ({
+			answer: response.answer,
+			optionAnswer: response.optionAnswer,
+			optionText: response.optionText,
+			files: response.files ?? [],
+			skip: response.skip,
+			questionId: response.questionId,
+			categoryId  : await getCatId(response.questionId),
+			state : determineState(response.optionText),
+			auditId : result.id
+		})));
+	
+		await prisma.response.createMany({
+			data: updatedResponse, // Wrap updatedResponse in a `data` field
+			skipDuplicates: true, // Optional: Skips inserting duplicates
+		  });
+
+		await prisma.surveyCategory.updateMany({
+			where : {
+				surveyId : parseInt(surveyId)
+			},
+			data : {
+				auditId : result.id
+			}
 		});
 
 		res.status(201).json({ result, message: 'Audit created successfully!' });
@@ -269,6 +311,15 @@ const updateRecord = async (req, res) => {
 			responses,
 		} = value;
 
+		const _clientId = await prisma.survey.findUnique({
+			where : {id : parseInt(surveyId)},
+			select : {
+				clientId : true
+			}
+		});
+
+		if (!_clientId) return res.status(404).json({ error: 'Client not found!' });
+
 		const result = await prisma.audit.update({
 			where: { id: parseInt(id) },
 			data: {
@@ -278,21 +329,48 @@ const updateRecord = async (req, res) => {
 				executiveSummary,
 				scenario,
 				status,
-				surveyId,
+				survey : {
+					connect : {
+						id : surveyId
+					}
+				},
 				uploads,
-				responses: {
-					deleteMany: { auditId: parseInt(id) },
-					create: responses.map((response) => ({
-						answer: response.answer,
-						optionAnswer: response.optionAnswer,
-						optionText: response.optionText,
-						files: response.files ?? [],
-						skip: response.skip,
-						questionId: response.questionId,
-					})),
+				client : {
+					connect : {
+						id : _clientId.clientId
+					}
 				},
 			},
 		});
+
+		for (const response of responses) {
+			
+			await prisma.response.upsert({
+				where : {
+					id : parseInt(response.id || 0)
+				},
+				create : {
+					answer: response.answer,
+					optionAnswer: response.optionAnswer,
+					optionText: response.optionText,
+					files: response.files ?? [],
+					skip: response.skip,
+					state : determineState(response.optionText),
+					question: { connect: { id: parseInt(response.questionId) } },
+					audit: { connect: { id: parseInt(result.id) } },
+					category : {connect : {id : await getCatId(response.questionId)}}
+				},
+				update : {
+					answer: response.answer,
+					optionAnswer: response.optionAnswer,
+					optionText: response.optionText,
+					files: response.files ?? [],
+					skip: response.skip,
+					questionId: response.questionId,
+					auditId : response.auditId
+				},
+			})
+		};
 
 		res.status(200).json({ result, message: 'Audit updated successfully!' });
 	} catch (error) {

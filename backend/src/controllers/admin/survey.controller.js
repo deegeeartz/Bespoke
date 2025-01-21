@@ -16,7 +16,7 @@ const schema = Joi.object({
 	endDate: Joi.string().allow(''),
 	inspectors: Joi.array().allow(''),
 	questions: Joi.array(),
-	categories: Joi.array().allow(''),
+	categories: Joi.array(),
 	sortedCategories: Joi.array().allow(''),
 	payload: Joi.string().allow(''),
 	surveyType: Joi.string().allow(''),
@@ -55,7 +55,10 @@ const getRecordById = async (req, res) => {
 		const { id } = req.params;
 		const result = await prisma.survey.findUnique({
 			where: { id: parseInt(id) },
-			include: { questions: true },
+			include: {
+				questions : true,
+				categories : true
+			},
 		});
 		if (!result) return res.status(404).json({ error: 'Survey not found!' });
 
@@ -72,7 +75,7 @@ const getRecordById = async (req, res) => {
 				(a, b) => result.sortedCategories?.indexOf(a.id) - result.sortedCategories?.indexOf(b.id)
 			);
 		}
-
+		
 		res.status(200).json({ result: { ...result, groupedQuestions: groupedQuestions } });
 	} catch (error) {
 		const prismaError = handlePrismaError(error);
@@ -82,11 +85,17 @@ const getRecordById = async (req, res) => {
 
 const createRecord = async (req, res) => {
 	try {
-		// Validation
+		// Validate incoming request body using the defined schema
 		const { error, value } = schema.validate(req.body);
 		if (error) return res.status(400).json({ error: error.details[0].message });
 
+		// Parse payload if it exists, otherwise use the validated value directly
 		const data = value.payload ? JSON.parse(value.payload) : value;
+
+		// Check if the categories array is empty, and return an error if so
+		if (data.categories.length <= 0) return res.status(400).json({ error: 'Your survey is probably empty' });
+
+		// Destructure validated data into individual variables
 		const {
 			clientId,
 			clientName,
@@ -98,38 +107,46 @@ const createRecord = async (req, res) => {
 			inspectors,
 			categories,
 			questions,
-			surveyType = 'EXTERNAL',
+			surveyType = 'EXTERNAL', // Default survey type to 'EXTERNAL' if not provided
 		} = data;
 
+		// Assign categories and questions to local variables for later use
 		let surveyCategories = categories;
 		let surveyQuestions = questions;
 
+		// Check if an Excel file was uploaded in the request
 		const excelFile = req?.files?.excelFile;
 		if (excelFile) {
+			// Extract categories and questions from the uploaded Excel file
 			const { categories, questions } = await extractDataFromExcel(excelFile);
-			surveyCategories = categories;
-			surveyQuestions = questions;
+			surveyCategories = categories; // Update categories from Excel data
+			surveyQuestions = questions; // Update questions from Excel data
 		}
-
-		// Create record
-		const result = await prisma.survey.create({
+		
+		// Create the main survey record in the database
+		let result = await prisma.survey.create({
 			data: {
 				hotelName,
 				campaign,
 				location,
-				startDate: startDate ? new Date(startDate) : null,
-				endDate: endDate ? new Date(endDate) : null,
+				startDate: startDate ? new Date(startDate) : null, // Convert startDate to Date or null
+				endDate: endDate ? new Date(endDate) : null, // Convert endDate to Date or null
 				inspectors,
 				clientName,
-				clientId: Number(clientId),
-				categories: surveyCategories || [],
-				type: surveyType,
+				clientId: Number(clientId), // Ensure clientId is a number
+				type: surveyType, // Survey type
+				categories : {
+					create: surveyCategories.map((cat) => ({
+						title: cat.title,
+						id : cat.id,
+					})),
+				},
 				questions: {
 					create: surveyQuestions.map((question) => ({
 						type: question.type,
 						text: question.text,
-						options: question.options ?? {},
-						categoryId: question.categoryId,
+						options: question.options ?? {}, // Default options to an empty object
+						categoryId: question.categoryId, // Associate question with a category
 					})),
 				},
 			},
@@ -137,8 +154,9 @@ const createRecord = async (req, res) => {
 
 		res.status(201).json({ result, message: 'Survey created successfully!' });
 	} catch (error) {
+		// Handle any Prisma errors that occur during the process
 		const prismaError = handlePrismaError(error);
-		res.status(prismaError.status).json(prismaError.response);
+		res.status(prismaError.status).json(prismaError.response); // Send error response
 	}
 };
 
@@ -168,19 +186,24 @@ const updateRecord = async (req, res) => {
 
 		// Determine questions to delete
 		const incomingQuestionIds = questions.map((q) => q.id).filter((id) => id);
+		const incomingCategoryIds = categories.map((cat) => cat.id).filter((id) => id);
 
 		// Delete questions that are not in the incoming list
-		await prisma.question.deleteMany({
+		const deleted = await prisma.question.deleteMany({
 			where: { surveyId: parseInt(id), id: { notIn: incomingQuestionIds } },
 		});
 
+		await prisma.surveyCategory.deleteMany({
+			where: { surveyId: parseInt(id), id: { notIn: incomingCategoryIds } },
+		});
+
 		// Prepare upsert operations for incoming questions
-		const upsertOperations = questions.map((question) => {
+		const questionUpsertOperations = questions.map((question) => {
 			return prisma.question.upsert({
 				where: { id: question.id || 0 }, // If id is provided, use it for the where clause
 				create: {
 					survey: { connect: { id: parseInt(id) } },
-					categoryId: question.categoryId,
+					category : {connect : {id : question.categoryId}},
 					type: question.type,
 					text: question.text,
 					options: question.options ?? {},
@@ -194,11 +217,27 @@ const updateRecord = async (req, res) => {
 			});
 		});
 
+		// Prepare upsert operations for incoming categories
+		const categoryUpsertOperations = categories.map((category) => {
+			return prisma.surveyCategory.upsert({
+				where: { id : category.id || 0}, 
+				create: {
+					survey: { connect: { id: parseInt(id) } },
+					id: category.id,
+					title: category.title,
+				},
+				update: {
+					id: category.id,
+					title: category.title,
+				},
+			});
+		});
+
 		// Execute all upsert operations within a transaction
-		await prisma.$transaction(upsertOperations);
+		await prisma.$transaction([...categoryUpsertOperations, ...questionUpsertOperations]);
 
 		// Update survey details
-		const result = await prisma.survey.update({
+		let result = await prisma.survey.update({
 			where: { id: parseInt(id) },
 			data: {
 				hotelName,
@@ -209,11 +248,13 @@ const updateRecord = async (req, res) => {
 				inspectors,
 				clientName,
 				clientId,
-				categories: categories || [],
 				sortedCategories,
 			},
 		});
-
+		result = {
+			...result,
+			categories : categories || []
+		}
 		res.status(200).json({ result, message: 'Survey updated successfully!' });
 	} catch (error) {
 		const prismaError = handlePrismaError(error);

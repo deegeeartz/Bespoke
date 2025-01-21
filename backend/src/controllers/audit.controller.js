@@ -3,7 +3,6 @@ const Joi = require('joi');
 const handlePrismaError = require('../utils/handlePrismaError');
 
 const prisma = new PrismaClient();
-
 const orderBy = { id: 'desc' };
 
 const schema = Joi.object({

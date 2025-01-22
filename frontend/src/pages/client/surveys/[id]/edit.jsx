@@ -35,11 +35,12 @@ const EditSurvey = () => {
 	const [surveyCategories, setSurveyCategories] = useState([]);
 	const [user, setUser] = useState(null);
 
+	console.log(surveyId);
 	const fetchData = async () => {
 		try {
 			const user = JSON.parse(Cookies.get('user'));
 			setUser(user);
-
+			
 			const survey = await http.get('/survey/' + surveyId);
 			const inspectors = await http.get('/inspector/list?clientId=' + user?.client?.id);
 			const categories = await http.get('/category/list');
@@ -178,6 +179,7 @@ const EditSurvey = () => {
 			const res = await http.put(`/survey/${surveyId}`, payload);
 			if (res?.status == 200) {
 				if (showAlert) toast.success(res.data.message);
+				fetchData();
 			}
 		} catch (error) {
 			errorHandler(error);

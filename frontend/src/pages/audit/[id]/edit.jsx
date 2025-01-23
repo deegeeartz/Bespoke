@@ -47,7 +47,7 @@ const EditAudit = () => {
 				} else {
 					setHttpLoading(false);
 				}
-
+				console.log(data);
 				setFormData(data.result);
 				setSurvey(data.result.survey);
 				setCategories(data.result.groupedQuestions);
@@ -137,6 +137,7 @@ const EditAudit = () => {
 			const res = await http.put(`/audit/${auditId}`, payload);
 			if (res?.status == 200) {
 				if (showAlert) toast.success(res.data.message);
+				fetchData();
 			}
 		} catch (error) {
 			errorHandler(error);
